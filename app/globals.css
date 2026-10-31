@@ -7,58 +7,28 @@ html[data-theme='light'] {
 }
 
 :root {
-  --bg: #0b1120;
-  --text: #e5e7eb;
-  --panel: #111827;
-  --soft-panel: rgba(255, 255, 255, 0.04);
-  --muted: #94a3b8;
+  --bg: #0f172a;
+  --text: #edf3ff;
 }
 
 html[data-theme='light'] {
-  --bg: #f6f1ea;
-  --text: #1a1a1a;
-  --panel: #fffdfb;
-  --soft-panel: rgba(15, 23, 42, 0.04);
-  --muted: #56657a;
+  --bg: #f4efe9;
+  --text: #1f2430;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-  min-height: 100vh;
-}
-
-button, input, textarea, select {
-  font: inherit;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
-  border-radius: 999px;
-}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; }
+body { min-height: 100vh; }
+button, input, textarea, select { font: inherit; }
+textarea { field-sizing: content; }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-  }
+  body { @apply bg-slate-950 text-slate-100 antialiased; }
 }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 999px; }

@@ -19,19 +19,12 @@ import {
 } from "lucide-react";
 import type { ChatSession, Message } from "@/lib/types";
 
-const sidebarItems = [
-  "Search",
-  "Projects",
-  "Artifacts",
-  "Code",
-  "Customize",
-  "Chats and tasks",
-];
+const sidebarItems = ["Search", "Projects", "Artifacts", "Code", "Customize", "Chats and tasks"];
 
 const defaultSession = {
   id: "new-chat",
   title: "New chat",
-  model: "claude-3-5-sonnet",
+  model: "claude-opus-4.8",
   messages: [],
   updatedAt: Date.now(),
 };
@@ -41,17 +34,14 @@ export function ChatShell() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeId, setActiveId] = useState<string>("new-chat");
   const [input, setInput] = useState("");
-  const [message, setMessage] = useState<Message | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<{ id: string; name: string; provider: string }[]>([]);
-  const [selectedModel, setSelectedModel] = useState("claude-3-5-sonnet");
+  const [selectedModel, setSelectedModel] = useState("claude-opus-4.8");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("agentrouter-theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-    }
+    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
 
     const savedSessions = localStorage.getItem("agentrouter-sessions");
     if (savedSessions) {
@@ -76,9 +66,7 @@ export function ChatShell() {
   }, [theme]);
 
   useEffect(() => {
-    if (sessions.length) {
-      localStorage.setItem("agentrouter-sessions", JSON.stringify(sessions));
-    }
+    if (sessions.length) localStorage.setItem("agentrouter-sessions", JSON.stringify(sessions));
   }, [sessions]);
 
   useEffect(() => {
@@ -87,9 +75,7 @@ export function ChatShell() {
       const list = await res.json();
       if (Array.isArray(list)) {
         setModels(list);
-        if (!selectedModel && list[0]?.id) {
-          setSelectedModel(list[0].id);
-        }
+        if (!selectedModel && list[0]?.id) setSelectedModel(list[0].id);
       }
     };
 
@@ -108,7 +94,6 @@ export function ChatShell() {
       messages: [],
       updatedAt: Date.now(),
     };
-
     setSessions((prev) => [newSession, ...prev]);
     setActiveId(newSession.id);
     setInput("");
@@ -126,20 +111,9 @@ export function ChatShell() {
         };
       });
 
-      if (next.some((session) => session.id === activeId)) {
-        return next;
-      }
+      if (next.some((session) => session.id === activeId)) return next;
 
-      return [
-        {
-          id: activeId,
-          title: "New chat",
-          model: selectedModel,
-          messages: nextMessages,
-          updatedAt: Date.now(),
-        },
-        ...prev,
-      ];
+      return [{ id: activeId, title: "New chat", model: selectedModel, messages: nextMessages, updatedAt: Date.now() }, ...prev];
     });
   };
 
@@ -164,11 +138,7 @@ export function ChatShell() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: selectedModel,
-          prompt: trimmed,
-          history: baseMessages,
-        }),
+        body: JSON.stringify({ model: selectedModel, prompt: trimmed, history: baseMessages }),
       });
 
       const data = await response.json();
@@ -196,117 +166,67 @@ export function ChatShell() {
 
   const deleteSession = (sessionId: string) => {
     setSessions((prev) => prev.filter((session) => session.id !== sessionId));
-    if (activeId === sessionId) {
-      setActiveId("new-chat");
-    }
-  };
-
-  const retryLast = async () => {
-    if (!activeSession.messages.length) return;
-    const lastUser = [...activeSession.messages].reverse().find((msg) => msg.role === "user");
-    if (!lastUser) return;
-
-    setInput(lastUser.content);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    if (activeId === sessionId) setActiveId("new-chat");
   };
 
   const copyMessage = async (content: string) => {
     await navigator.clipboard.writeText(content);
   };
 
-  const themeClasses =
-    theme === "dark"
-      ? "bg-[#0d1117] text-[#e5e7eb]"
-      : "bg-[#f5f0ea] text-[#1a1a1a]";
-
-  const surfaceClass =
-    theme === "dark" ? "bg-[#111827] border-[#2a3347]" : "bg-[#f8f5f1] border-[#ddd0c8]";
-
-  const inputClass =
-    theme === "dark"
-      ? "bg-[#1a1f2b] border-[#2b3447] text-white"
-      : "bg-white border-[#e2d7ce] text-[#1f2937]";
+  const darkShell = theme === "dark";
 
   return (
-    <div className={`min-h-screen ${themeClasses}`}>
-      <div className="mx-auto max-w-[1800px] min-h-screen">
-        <header className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 md:px-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-xl">⌂</div>
-            <div className="flex items-center gap-3 rounded-full bg-[#2a2f39] px-5 py-3 shadow-inner shadow-black/20">
-              <span className="text-2xl font-semibold tracking-tight">agentrouter.org</span>
+    <div className={darkShell ? "min-h-screen bg-[#111827] text-[#e7ecf5]" : "min-h-screen bg-[#f4efe9] text-[#1f2430]"}>
+      <div className="mx-auto max-w-[1700px] min-h-screen">
+        <header className={darkShell ? "flex items-center justify-between border-b border-white/10 bg-[#1b2330] px-5 py-4" : "flex items-center justify-between border-b border-[#d2c8be] bg-[#f4efe9] px-5 py-4"}>
+          <div className="flex items-center gap-3">
+            <div className={darkShell ? "flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#232d3a] text-lg" : "flex h-10 w-10 items-center justify-center rounded-xl border border-[#d7cfc5] bg-[#f8f5f1] text-lg"}>⌂</div>
+            <div className={darkShell ? "rounded-full bg-[#2a313d] px-5 py-3 text-[20px] font-semibold tracking-[-0.05em] text-white" : "rounded-full bg-[#ece5df] px-5 py-3 text-[20px] font-semibold tracking-[-0.05em] text-[#1f2430]"}>
+              agentrouter.org
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full border border-white/10 p-2 text-sm"
-            >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            <button type="button" onClick={() => setTheme(darkShell ? "light" : "dark")} className={darkShell ? "rounded-full border border-white/10 bg-[#202b38] p-2" : "rounded-full border border-[#d7cfc5] bg-[#f8f5f1] p-2"}>
+              {darkShell ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <button
-              type="button"
-              onClick={createNewChat}
-              className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2"
-            >
-              <MessageSquarePlus size={18} />
-              <span className="text-sm">New</span>
+            <button type="button" onClick={createNewChat} className={darkShell ? "flex items-center gap-2 rounded-full border border-white/10 bg-[#2a313d] px-4 py-2 text-sm" : "flex items-center gap-2 rounded-full border border-[#d7cfc5] bg-[#f8f5f1] px-4 py-2 text-sm"}>
+              <MessageSquarePlus size={16} />
+              <span>New</span>
             </button>
-            <button className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5">
-              <MoreHorizontal size={18} />
+            <button type="button" className={darkShell ? "flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#202b38]" : "flex h-9 w-9 items-center justify-center rounded-full border border-[#d7cfc5] bg-[#f8f5f1]"}>
+              <MoreHorizontal size={16} />
             </button>
           </div>
         </header>
 
-        <div className="flex min-h-[calc(100vh-73px)]">
-          <aside className={`w-[280px] border-r ${surfaceClass}`}>
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="flex min-h-[calc(100vh-85px)]">
+          <aside className={darkShell ? "w-[300px] border-r border-white/10 bg-[#181f2b]" : "w-[300px] border-r border-[#d8d0c8] bg-[#f5f0eb]"}>
+            <div className={darkShell ? "border-b border-white/10 p-4 text-sm font-medium" : "border-b border-[#d8d0c8] p-4 text-sm font-medium"}>
+              <div className="flex items-center gap-2">
                 <House size={15} />
-                <span>AgentRouter</span>
+                <span>Agent Router</span>
               </div>
-              <button className="rounded-md border border-white/10 p-1.5 text-xs">≡</button>
             </div>
 
             <div className="space-y-2 p-3">
               {sidebarItems.map((item) => (
-                <button
-                  key={item}
-                  className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm ${
-                    item === "Chats and tasks" ? "bg-white/5" : "hover:bg-white/5"
-                  }`}
-                  type="button"
-                >
+                <button key={item} type="button" className={darkShell ? "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-[#dfe7f4] hover:bg-white/5" : "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-[#2a2d3a] hover:bg-[#eee7e0]"}>
                   <Search size={14} />
                   <span>{item}</span>
                 </button>
               ))}
             </div>
 
-            <div className="mt-3 border-t border-white/10 p-3">
-              <div className="mb-2 text-xs uppercase tracking-[0.12em] text-gray-400">Chats</div>
+            <div className={darkShell ? "mt-3 border-t border-white/10 p-3" : "mt-3 border-t border-[#d8d0c8] p-3"}>
+              <div className={darkShell ? "mb-3 text-[10px] uppercase tracking-[0.18em] text-[#93a1b8]" : "mb-3 text-[10px] uppercase tracking-[0.18em] text-[#6b7280]"}>Chats</div>
               <div className="space-y-2">
                 {sessions.map((session) => (
-                  <div
-                    key={session.id}
-                    onClick={() => setActiveId(session.id)}
-                    className={`group flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 transition ${
-                      activeId === session.id ? "bg-white/5" : "hover:bg-white/5"
-                    }`}
-                  >
+                  <div key={session.id} onClick={() => setActiveId(session.id)} className={darkShell ? `group flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 ${activeId === session.id ? "bg-white/5" : "hover:bg-white/5"}` : `group flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 ${activeId === session.id ? "bg-[#ece5df]" : "hover:bg-[#efe7e1]"}`}>
                     <div className="min-w-0 flex-1 truncate text-sm">
-                      {session.messages[0]?.content?.slice(0, 36) || session.title || "New chat"}
+                      {session.messages[0]?.content?.slice(0, 40) || session.title || "New chat"}
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteSession(session.id);
-                      }}
-                      className="ml-2 opacity-0 transition group-hover:opacity-100"
-                    >
+                    <button type="button" onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }} className="ml-2 opacity-0 transition group-hover:opacity-100">
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -315,47 +235,41 @@ export function ChatShell() {
             </div>
           </aside>
 
-          <main className="relative flex flex-1 flex-col">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-3">
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <span className="rounded-full border border-dashed border-white/10 px-2 py-1">AgentRouter</span>
+          <main className={darkShell ? "relative flex flex-1 flex-col bg-[#101720]" : "relative flex flex-1 flex-col bg-[#f9f4f0]"}>
+            <div className={darkShell ? "flex items-center justify-between border-b border-white/10 px-4 py-3 text-sm text-[#b6bfd1]" : "flex items-center justify-between border-b border-[#d8d0c8] px-4 py-3 text-sm text-[#565e74]"}>
+              <div className="flex items-center gap-2">
+                <div className="rounded-full border border-dashed border-current px-2 py-1">AgentRouter</div>
               </div>
-              <div className="flex items-center gap-3">
-                <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm">Free plan</button>
-                <button className="rounded-full bg-[#1e293b] px-3 py-1.5 text-sm text-white">Upgrade</button>
+              <div className="flex items-center gap-2">
+                <button type="button" className={darkShell ? "rounded-full border border-white/10 bg-[#1e2937] px-3 py-1.5 text-xs" : "rounded-full border border-[#d7cfc5] bg-[#f8f5f1] px-3 py-1.5 text-xs"}>Free plan</button>
+                <button type="button" className={darkShell ? "rounded-full bg-[#1d4ed8] px-3 py-1.5 text-xs text-white" : "rounded-full bg-[#1d4ed8] px-3 py-1.5 text-xs text-white"}>Upgrade</button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto p-6">
-              <h1 className="mb-8 text-5xl font-semibold tracking-[-0.05em] text-[#111827] dark:text-white">
-                Evening, how are things?
-              </h1>
+            <div className="flex-1 overflow-auto px-8 py-6">
+              <div className="mx-auto max-w-[1100px]">
+                <div className={darkShell ? "mb-8 text-[44px] font-semibold tracking-[-0.06em] text-[#edf3ff]" : "mb-8 text-[44px] font-semibold tracking-[-0.06em] text-[#1f2430]"}>
+                  Good evening, how are things?
+                </div>
 
-              <div className="mx-auto max-w-4xl space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className={darkShell ? "rounded-2xl border border-white/10 bg-[#111b27] p-4" : "rounded-2xl border border-[#d8d0c8] bg-[#f5f0eb] p-4"}>
                   <div className="mb-4 flex items-center gap-2 text-sm font-medium">
                     <Wand2 size={16} />
                     <span>How can I help you today?</span>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <button className="rounded-xl border border-white/10 bg-[#111827] px-3 py-2 text-sm text-white">Chat</button>
-                    <button className="rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm">Create</button>
-                    <button className="rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm">Workflow</button>
-                    <button className="rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm">Auto</button>
+                  <div className="mb-4 flex flex-wrap gap-3">
+                    <button type="button" className={darkShell ? "rounded-xl border border-white/10 bg-[#1a2231] px-3 py-2 text-sm" : "rounded-xl border border-[#d7cfc5] bg-[#f8f5f1] px-3 py-2 text-sm"}>Chat</button>
+                    <button type="button" className={darkShell ? "rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm" : "rounded-xl border border-[#d7cfc5] bg-transparent px-3 py-2 text-sm"}>Create</button>
+                    <button type="button" className={darkShell ? "rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm" : "rounded-xl border border-[#d7cfc5] bg-transparent px-3 py-2 text-sm"}>Workflow</button>
+                    <button type="button" className={darkShell ? "rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm" : "rounded-xl border border-[#d7cfc5] bg-transparent px-3 py-2 text-sm"}>Auto</button>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3">
                     {models.length ? (
-                      <select
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="rounded-xl border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none"
-                      >
+                      <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={darkShell ? "rounded-xl border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none" : "rounded-xl border border-[#d7cfc5] bg-white px-3 py-2 text-sm text-[#1f2430] outline-none"}>
                         {models.map((model) => (
-                          <option key={model.id} value={model.id}>
-                            {model.name}
-                          </option>
+                          <option key={model.id} value={model.id}>{model.name}</option>
                         ))}
                       </select>
                     ) : null}
@@ -363,27 +277,14 @@ export function ChatShell() {
                 </div>
 
                 {activeSession.messages.length ? (
-                  <div className="space-y-3">
+                  <div className="mt-5 space-y-3">
                     {activeSession.messages.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`rounded-2xl border p-4 ${
-                          item.role === "assistant"
-                            ? "border-white/10 bg-white/5"
-                            : "border-sky-500/20 bg-sky-500/5"
-                        }`}
-                      >
-                        <div className="mb-2 flex items-center justify-between text-xs text-gray-400">
+                      <div key={item.id} className={item.role === "assistant" ? (darkShell ? "rounded-2xl border border-white/10 bg-[#121c2d] p-4" : "rounded-2xl border border-[#d8d0c8] bg-[#f7f2ee] p-4") : (darkShell ? "rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4" : "rounded-2xl border border-sky-100 bg-sky-50 p-4")}>
+                        <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.12em] text-[#8390a3]">
                           <span>{item.role === "assistant" ? "Assistant" : "You"}</span>
-                          <div className="flex items-center gap-2">
-                            {item.role === "assistant" ? (
-                              <button onClick={() => copyMessage(item.content)}>
-                                <Copy size={14} />
-                              </button>
-                            ) : null}
-                          </div>
+                          {item.role === "assistant" ? <button type="button" onClick={() => copyMessage(item.content)}><Copy size={14} /></button> : null}
                         </div>
-                        <div className="whitespace-pre-wrap text-[15px] leading-7 text-current">{item.content}</div>
+                        <div className="whitespace-pre-wrap text-[15px] leading-7">{item.content}</div>
                       </div>
                     ))}
                   </div>
@@ -391,53 +292,27 @@ export function ChatShell() {
               </div>
             </div>
 
-            <div className="border-t border-white/10 p-4">
-              <div className="mx-auto max-w-5xl rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="mb-2 flex items-center gap-2 text-sm text-gray-400">
-                  <button type="button" className="rounded-lg border border-white/10 p-2">
-                    +
-                  </button>
-                  <button type="button" className="rounded-lg border border-white/10 p-2">
-                    <Eraser size={15} />
-                  </button>
+            <div className={darkShell ? "border-t border-white/10 bg-[#121922] p-4" : "border-t border-[#d8d0c8] bg-[#f7f2ee] p-4"}>
+              <div className="mx-auto max-w-[1100px]">
+                <div className={darkShell ? "mb-2 flex items-center gap-2 text-sm text-[#aab7ca]" : "mb-2 flex items-center gap-2 text-sm text-[#697386]"}>
+                  <button type="button" className={darkShell ? "rounded-lg border border-white/10 p-2" : "rounded-lg border border-[#d7cfc5] p-2"}>+</button>
+                  <button type="button" className={darkShell ? "rounded-lg border border-white/10 p-2" : "rounded-lg border border-[#d7cfc5] p-2"}><Eraser size={15} /></button>
                 </div>
 
-                <div className={`flex items-end gap-3 rounded-2xl border ${inputClass} p-3`}>
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                    rows={1}
-                    placeholder="Write a message..."
-                    className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent text-base outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={sendMessage}
-                    disabled={isLoading}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
+                <div className={darkShell ? "flex items-end gap-3 rounded-2xl border border-white/10 bg-[#151e2b] p-3" : "flex items-end gap-3 rounded-2xl border border-[#d7cfc5] bg-white p-3"}>
+                  <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} rows={1} placeholder="Write a message..." className="max-h-40 min-h-[52px] flex-1 resize-none bg-transparent text-base outline-none" />
+                  <button type="button" onClick={sendMessage} disabled={isLoading} className={darkShell ? "flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#0b1120] disabled:opacity-60" : "flex h-11 w-11 items-center justify-center rounded-xl bg-[#0b1120] text-white disabled:opacity-60"}>
                     {isLoading ? <RefreshCcw className="animate-spin" size={17} /> : <Send size={17} />}
                   </button>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between text-xs text-gray-400">
+                <div className={darkShell ? "mt-3 flex items-center justify-between text-xs text-[#9aa9bd]" : "mt-3 flex items-center justify-between text-xs text-[#697386]"}>
                   <div className="flex items-center gap-3">
                     <span>Model: {models.find((m) => m.id === selectedModel)?.name || selectedModel}</span>
-                    <button type="button" onClick={retryLast}>
-                      Retry
-                    </button>
+                    <button type="button" onClick={() => setInput(input)} className="underline-offset-2 hover:underline">Retry</button>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button type="button">
-                      <Settings size={14} />
-                    </button>
+                    <Settings size={14} />
                   </div>
                 </div>
               </div>
