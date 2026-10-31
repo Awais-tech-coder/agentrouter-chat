@@ -23,7 +23,7 @@ const sidebarItems = ["Search", "Projects", "Artifacts", "Code", "Customize", "C
 const defaultSession = {
   id: "new-chat",
   title: "New chat",
-  model: "gpt-5.6",
+  model: "gpt-5.6-sol",
   messages: [],
   updatedAt: Date.now(),
 };
@@ -35,7 +35,7 @@ export function ChatShell() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<{ id: string; name: string; provider: string }[]>([]);
-  const [selectedModel, setSelectedModel] = useState("gpt-5.6");
+  const [selectedModel, setSelectedModel] = useState("gpt-5.6-sol");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
